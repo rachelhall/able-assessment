@@ -1,0 +1,433 @@
+From 04fd14b30474b553592d0f87b4648893bf35584e Mon Sep 17 00:00:00 2001
+From: rachelhall <thharbin@gmail.com>
+Date: Fri, 29 Jul 2022 21:00:23 -0700
+Subject: [PATCH 2/2] Initial implementation of instructional time calculator.
+
+---
+ README.md                                 |  47 ++-------
+ package-lock.json                         |  44 +++++++++
+ package.json                              |   1 +
+ src/App.css                               |  37 ++-----
+ src/App.tsx                               | 113 +++++++++++++++++++---
+ src/__tests__/calculatePercentage.test.js |  59 +++++++++++
+ src/utils/calculatePercentage.ts          |  22 +++++
+ 7 files changed, 242 insertions(+), 81 deletions(-)
+ create mode 100644 src/__tests__/calculatePercentage.test.js
+ create mode 100644 src/utils/calculatePercentage.ts
+
+diff --git a/README.md b/README.md
+index b87cb00..1bfa071 100644
+--- a/README.md
++++ b/README.md
+@@ -1,46 +1,19 @@
+-# Getting Started with Create React App
++# Running and testing the instructional classes percentage calculator
+ 
+-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
++1. Open the project directory in your terminal and run `npm install`
+ 
+-## Available Scripts
++2. Run `npm start` to run the application
+ 
+-In the project directory, you can run:
++3. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+ 
+-### `npm start`
++4. Run `npm test` to run the test suite
+ 
+-Runs the app in the development mode.\
+-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
++# Next steps:
+ 
+-The page will reload if you make edits.\
+-You will also see any lint errors in the console.
++1. Implement styles according to designs
+ 
+-### `npm test`
++2. Provide option to display time as a percentage or in minutes.
+ 
+-Launches the test runner in the interactive watch mode.\
+-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
++3. Add dropdown to select other tags for calculating the time other than only `instructional`.
+ 
+-### `npm run build`
+-
+-Builds the app for production to the `build` folder.\
+-It correctly bundles React in production mode and optimizes the build for the best performance.
+-
+-The build is minified and the filenames include the hashes.\
+-Your app is ready to be deployed!
+-
+-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+-
+-### `npm run eject`
+-
+-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+-
+-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+-
+-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+-
+-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+-
+-## Learn More
+-
+-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+-
+-To learn React, check out the [React documentation](https://reactjs.org/).
++4. Test coverage to make sure percentage calculated matches the student's name being displayed
+diff --git a/package-lock.json b/package-lock.json
+index b916f1d..e7e704a 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -15,6 +15,7 @@
+         "@types/node": "^16.11.46",
+         "@types/react": "^18.0.15",
+         "@types/react-dom": "^18.0.6",
++        "axios": "^0.27.2",
+         "react": "^18.2.0",
+         "react-dom": "^18.2.0",
+         "react-scripts": "5.0.1",
+@@ -4648,6 +4649,28 @@
+         "node": ">=4"
+       }
+     },
++    "node_modules/axios": {
++      "version": "0.27.2",
++      "resolved": "https://registry.npmjs.org/axios/-/axios-0.27.2.tgz",
++      "integrity": "sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==",
++      "dependencies": {
++        "follow-redirects": "^1.14.9",
++        "form-data": "^4.0.0"
++      }
++    },
++    "node_modules/axios/node_modules/form-data": {
++      "version": "4.0.0",
++      "resolved": "https://registry.npmjs.org/form-data/-/form-data-4.0.0.tgz",
++      "integrity": "sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==",
++      "dependencies": {
++        "asynckit": "^0.4.0",
++        "combined-stream": "^1.0.8",
++        "mime-types": "^2.1.12"
++      },
++      "engines": {
++        "node": ">= 6"
++      }
++    },
+     "node_modules/axobject-query": {
+       "version": "2.2.0",
+       "resolved": "https://registry.npmjs.org/axobject-query/-/axobject-query-2.2.0.tgz",
+@@ -19796,6 +19819,27 @@
+       "resolved": "https://registry.npmjs.org/axe-core/-/axe-core-4.4.3.tgz",
+       "integrity": "sha512-32+ub6kkdhhWick/UjvEwRchgoetXqTK14INLqbGm5U2TzBkBNF3nQtLYm8ovxSkQWArjEQvftCKryjZaATu3w=="
+     },
++    "axios": {
++      "version": "0.27.2",
++      "resolved": "https://registry.npmjs.org/axios/-/axios-0.27.2.tgz",
++      "integrity": "sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==",
++      "requires": {
++        "follow-redirects": "^1.14.9",
++        "form-data": "^4.0.0"
++      },
++      "dependencies": {
++        "form-data": {
++          "version": "4.0.0",
++          "resolved": "https://registry.npmjs.org/form-data/-/form-data-4.0.0.tgz",
++          "integrity": "sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==",
++          "requires": {
++            "asynckit": "^0.4.0",
++            "combined-stream": "^1.0.8",
++            "mime-types": "^2.1.12"
++          }
++        }
++      }
++    },
+     "axobject-query": {
+       "version": "2.2.0",
+       "resolved": "https://registry.npmjs.org/axobject-query/-/axobject-query-2.2.0.tgz",
+diff --git a/package.json b/package.json
+index ef9b170..595a1fe 100644
+--- a/package.json
++++ b/package.json
+@@ -10,6 +10,7 @@
+     "@types/node": "^16.11.46",
+     "@types/react": "^18.0.15",
+     "@types/react-dom": "^18.0.6",
++    "axios": "^0.27.2",
+     "react": "^18.2.0",
+     "react-dom": "^18.2.0",
+     "react-scripts": "5.0.1",
+diff --git a/src/App.css b/src/App.css
+index 74b5e05..640fd49 100644
+--- a/src/App.css
++++ b/src/App.css
+@@ -1,38 +1,17 @@
+ .App {
+-  text-align: center;
+-}
+-
+-.App-logo {
+-  height: 40vmin;
+-  pointer-events: none;
+-}
+-
+-@media (prefers-reduced-motion: no-preference) {
+-  .App-logo {
+-    animation: App-logo-spin infinite 20s linear;
+-  }
+-}
+-
+-.App-header {
+-  background-color: #282c34;
+-  min-height: 100vh;
++margin-top: 15rem;
+   display: flex;
++  height: 100vh;
+   flex-direction: column;
+   align-items: center;
+-  justify-content: center;
+-  font-size: calc(10px + 2vmin);
+-  color: white;
+ }
+ 
+-.App-link {
+-  color: #61dafb;
++button {
++  margin: 0 2rem;
++  padding: .5rem
+ }
+ 
+-@keyframes App-logo-spin {
+-  from {
+-    transform: rotate(0deg);
+-  }
+-  to {
+-    transform: rotate(360deg);
+-  }
++select {
++  padding: .5rem
+ }
++
+diff --git a/src/App.tsx b/src/App.tsx
+index a53698a..05a5ed9 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,24 +1,107 @@
+-import React from 'react';
+-import logo from './logo.svg';
+-import './App.css';
++import React, { useEffect, useState } from "react";
++import logo from "./logo.svg";
++import "./App.css";
++import axios from "axios";
++import { calculatePercentage } from "./utils/calculatePercentage";
++
++const TOKEN = `2444011b-7b70-4608-aa17-bdfb67359553`;
++const studentURL = `https://crystal-pepsi.herokuapp.com/students`;
++
++const axiosConfig = {
++  headers: {
++    Authorization: TOKEN,
++  },
++};
++
++type dayOfWeek = "regular_day" | "short_day";
++type tag = "instructional" | "lunch" | "pe" | "core";
++export interface IClass {
++  id: number;
++  period: number;
++  daysOfWeek: dayOfWeek[];
++  duration: number;
++  name: string;
++  tags: tag[];
++}
+ 
+ function App() {
++  const [students, setStudents] = useState<string[]>([]);
++  const [selectedStudent, setSelectedStudent] = useState<string>("");
++  const [schedule, setSchedule] = useState<IClass[]>([]);
++  const [timeInMeetings, setTimeInMeetings] = useState<number>();
++  const [reportedStudent, setReportedStudent] = useState("");
++
++  const meetingsURL = `https://crystal-pepsi.herokuapp.com/students/${selectedStudent}/meetings`;
++
++  const getSchedule = () => {
++    axios
++      .get(meetingsURL, axiosConfig)
++      .then((res) => setSchedule(res.data))
++      .catch((error) => {
++        if (axios.isAxiosError(error)) {
++          console.log("error message: ", error.message);
++          return error.message;
++        } else {
++          console.log("unexpected error: ", error);
++          return "An unexpected error occurred";
++        }
++      });
++  };
++
++  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
++    event.preventDefault();
++    getSchedule();
++  };
++
++  useEffect(() => {
++    setTimeInMeetings(calculatePercentage(schedule));
++    setReportedStudent(selectedStudent);
++  }, [schedule]);
++
++  useEffect(() => {
++    axios
++      .get(studentURL, axiosConfig)
++      .then((res) => {
++        setStudents(res.data);
++      })
++      .catch((error) => {
++        if (axios.isAxiosError(error)) {
++          console.log("error message: ", error.message);
++          // 👇️ error: AxiosError<any, any>
++          return error.message;
++        } else {
++          console.log("unexpected error: ", error);
++          return "An unexpected error occurred";
++        }
++      });
++  }, []);
++
++  useEffect(() => setSelectedStudent(students[0]), [students]);
++
+   return (
+     <div className="App">
+-      <header className="App-header">
+-        <img src={logo} className="App-logo" alt="logo" />
++      <form onSubmit={(e) => handleSubmit(e)}>
++        <select
++          defaultValue={selectedStudent ?? ""}
++          onChange={(event) => {
++            setSelectedStudent(event.target.value);
++          }}
++        >
++          {students.map((student, index) => (
++            <option key={index} value={student}>
++              {student}
++            </option>
++          ))}
++        </select>
++        <button type="submit">Submit</button>
++      </form>
++      <div className="schedule">
+         <p>
+-          Edit <code>src/App.tsx</code> and save to reload.
++          {reportedStudent && timeInMeetings !== undefined
++            ? `${reportedStudent} spends ${timeInMeetings}% of their time in instructional meetings.`
++            : ""}
+         </p>
+-        <a
+-          className="App-link"
+-          href="https://reactjs.org"
+-          target="_blank"
+-          rel="noopener noreferrer"
+-        >
+-          Learn React
+-        </a>
+-      </header>
++      </div>
+     </div>
+   );
+ }
+diff --git a/src/__tests__/calculatePercentage.test.js b/src/__tests__/calculatePercentage.test.js
+new file mode 100644
+index 0000000..14c0ddb
+--- /dev/null
++++ b/src/__tests__/calculatePercentage.test.js
+@@ -0,0 +1,59 @@
++import { calculatePercentage } from "../utils/calculatePercentage";
++
++const testSchedule = [
++  {
++    id: 1,
++    period: 0,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 30,
++    name: "Arrival",
++    tags: [],
++  },
++  {
++    id: 2,
++    period: 1,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 45,
++    name: "Music Theory",
++    tags: ["instructional"],
++  },
++  {
++    id: 3,
++    period: 2,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 45,
++    name: "Jazz Band",
++    tags: ["instructional"],
++  },
++];
++const testSchedule2 = [
++  {
++    id: 1,
++    period: 0,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 30,
++    name: "Arrival",
++    tags: ["instructional"],
++  },
++  {
++    id: 2,
++    period: 1,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 45,
++    name: "Music Theory",
++    tags: ["instructional"],
++  },
++  {
++    id: 3,
++    period: 2,
++    days_of_week: ["regular_day", "short_day"],
++    duration: 45,
++    name: "Jazz Band",
++    tags: ["instructional"],
++  },
++];
++
++test("gets percentage of student schedule tagged instructional", () => {
++  expect(calculatePercentage(testSchedule)).toBe(0.75);
++  expect(calculatePercentage(testSchedule2)).toBe(1.0);
++});
+diff --git a/src/utils/calculatePercentage.ts b/src/utils/calculatePercentage.ts
+new file mode 100644
+index 0000000..915f7e9
+--- /dev/null
++++ b/src/utils/calculatePercentage.ts
+@@ -0,0 +1,22 @@
++import { IClass } from "../App";
++
++export const calculatePercentage = (schedule: IClass[]) => {
++  let totalMinutes = 0;
++  let instructionalMinutes = 0;
++  const instructionalClasses: IClass[] = [];
++  schedule.forEach((period) => {
++    totalMinutes += period.duration;
++    if (period.tags.includes("instructional")) {
++      instructionalClasses.push(period);
++    }
++  });
++  if (instructionalClasses.length === 0) {
++    return 0;
++  }
++
++  instructionalClasses.forEach((period) => {
++    instructionalMinutes += period.duration;
++  });
++
++  return Math.round((instructionalMinutes / totalMinutes) * 100) / 100;
++};
+-- 
+2.32.0 (Apple Git-132)
+
